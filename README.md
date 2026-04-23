@@ -33,3 +33,78 @@ As the number of users increases, a single server will eventually run out of res
 - **Independent Scaling:** You can upgrade or add more web servers (for traffic) or upgrade the database server (for storage/compute) individually based on what is becoming the bottleneck.
 - **Better Performance:** Each server uses its dedicated resources exclusively for its specific task, preventing them from competing for CPU or memory.
 - **Improved Security:** The database is no longer directly exposed to the public internet; it only communicates with the trusted Web Tier.
+
+## Choosing the Right Type of Database
+![alt text](<Screenshot (11).png>)
+
+When designing your Data Tier, selecting the appropriate database architecture is a critical decision. There are **two main options**:
+
+### 1. Relational Databases (RDBMS)
+Relational databases are highly structured and organize data into predefined **tables and rows** with strict relationships between them.
+
+- **Key Characteristics:** Ensures strong data consistency and is ideal for structured data and complex queries.
+- **Query Language:** They use **SQL (Structured Query Language)** for finding and manipulating data.
+- **Examples:** PostgreSQL, MySQL, SQLite, Oracle Database.
+
+#### Advantages of RDBMS:
+- **Complex Queries:** They support complex **JOIN operations** across multiple tables, making it easy to fetch related data.
+- **Data Consistency & Integrity:** They provide strict data integrity, especially important for transactions. Each transaction reliably follows the **ACID** properties:
+  - **A (Atomicity):** Ensures that a transaction is treated as a single, indivisible unit. Either all operations within it succeed, or none do (all-or-nothing).
+  - **C (Consistency):** Ensures the database transitions from one valid state to another. Any data written must follow the defined rules and constraints.
+  - **I (Isolation):** Ensures that concurrent transactions execute independently without interfering with each other. The result is the same as if they were executed sequentially.
+  - **D (Durability):** Ensures that once a transaction is committed, it remains permanently stored, even in the event of a system failure or crash.
+
+### 2. Non-Relational Databases (NoSQL)
+NoSQL databases provide much more flexibility, as they do not require a fixed schema. They are heavily used to store, manage, and quickly access large amounts of **unstructured or semi-structured data**.
+
+- **Key Characteristics:** Highly scalable, flexible data models, and excellent for rapid development.
+- **Different Forms of NoSQL:**
+  
+  - **Document Stores:** Store data in JSON-like documents. Example: **MongoDB**
+  ![alt text](<Screenshot (12).png>)
+    ```mermaid
+    classDiagram
+        class Document1 {
+            _id: "101"
+            name: "Alice"
+            age: 28
+            address: { city: "NY" }
+        }
+        class Document2 {
+            _id: "102"
+            name: "Bob"
+            hobbies: ["Reading", "Gaming"]
+        }
+    ```
+
+  - **Wide-Column Stores:** Store data in tables, rows, and dynamic columns. Example: **Cassandra/Cosmos DB**
+  ![alt text](<Screenshot (13).png>)
+    ```mermaid
+    classDiagram`
+        class RowKey_User1 {
+            name: "Alice"
+            email: "alice@web.com"
+        }
+        class RowKey_User2 {
+            name: "Bob"
+            age: "32"
+        }
+    ```
+
+  - **Key-Value Stores:** Store data as a collection of key-value pairs. Example: **Redis/Memcached**
+  ![alt text](<Screenshot (16).png>)
+    ```mermaid
+    graph LR
+        K1["Key: 'session:101'"] --> V1["Value: '{user: 1, active: true}'"]
+        K2["Key: 'cart:55'"] --> V2["Value: '{item: laptop, qty: 1}'"]
+    ```
+
+  - **Graph Databases:** Store data in nodes and edges, focusing on relationships. Example: **Neo4j**
+  ![alt text](<Screenshot (15).png>)
+    ```mermaid
+    graph LR
+        A((Alice)) -- KNOWS --> B((Bob))
+        A -- LIVES_IN --> C((New York))
+        B -- WORKS_AT --> D((Tech Corp))
+        C <-- LOCATED_IN -- D
+    ```
