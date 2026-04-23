@@ -151,6 +151,14 @@ When your application starts receiving heavy traffic and your current server set
 - **Understanding the Content:** Vertical scaling means adding more power (CPU, RAM, Storage, etc.) to your existing server. You are essentially making your single machine stronger.
 - **Example:** Upgrading your server from 8GB of RAM and 4 CPUs to 64GB of RAM and 16 CPUs.
 
+```mermaid
+flowchart LR
+    S1["Server<br>(8GB RAM, 4 CPU)"] -- "Scale Up" --> S2["Server<br>(64GB RAM, 16 CPU)"]
+    
+    style S1 fill:#f9f,stroke:#333,stroke-width:2px
+    style S2 fill:#bbf,stroke:#333,stroke-width:4px
+```
+
 **Advantages:**
 - Very simple to implement (usually no code changes required).
 - Less complex administration and maintenance.
@@ -164,6 +172,20 @@ When your application starts receiving heavy traffic and your current server set
 ### 2. Horizontal Scaling (Scale-Out)
 - **Understanding the Content:** Horizontal scaling means adding more servers into your pool of resources. Instead of making one server stronger, you add more servers to distribute the load using a Load Balancer.
 - **Example:** Going from running your application on 1 server to running it simultaneously on 10 identical servers.
+
+```mermaid
+flowchart LR
+    S1["Single App Server"] -- "Scale Out" --> LB{"Load Balancer"}
+    LB --> S2["App Server 1"]
+    LB --> S3["App Server 2"]
+    LB --> S4["App Server 3"]
+    
+    style LB fill:#f90,stroke:#333,stroke-width:2px
+    style S1 fill:#bbf,stroke:#333,stroke-width:2px
+    style S2 fill:#bbf,stroke:#333,stroke-width:2px
+    style S3 fill:#bbf,stroke:#333,stroke-width:2px
+    style S4 fill:#bbf,stroke:#333,stroke-width:2px
+```
 
 **Advantages:**
 - **Infinite Scalability:** You can theoretically keep adding an endless number of servers.
