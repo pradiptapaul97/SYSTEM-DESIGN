@@ -217,3 +217,65 @@ flowchart LR
 #### Use Horizontal Scaling when:
 - **Large-Scale Applications:** You anticipate massive traffic that no single machine could ever handle (e.g., global social media or e-commerce platforms).
 - **Stateless Web Services:** If your web/application servers don't store local user session data, they can easily be scaled horizontally to handle sudden traffic spikes dynamically.
+
+---
+
+## Load Balancers
+
+A **Load Balancer** distributes incoming network traffic across multiple servers. This ensures that no single server bears too much load, which improves overall application responsiveness and availability.
+
+### 7 Strategies and Algorithms Used in Load Balancing:
+
+#### 1. Round Robin
+- **Description:** The simplest algorithm. It routes each incoming request to the next server in the line, cycling through the list of servers in order.
+- **Workflow:** Request 1 goes to Server A, Request 2 goes to Server B, Request 3 goes to Server C, Request 4 goes back to Server A, and so on.
+- **Advantages:** Extremely simple to implement; ensures a mathematically even distribution of requests.
+- **Disadvantages:** Does not account for server health, current load, or capacity. Can easily overload a server that gets stuck processing heavy requests.
+
+#### 2. Least Connection
+- **Description:** Routes traffic to the server with the fewest active connections at the time the request is received.
+- **Workflow:** When a new request arrives, the load balancer checks the active connection count for all servers. If Server A has 50 connections and Server B has 10, the load balancer sends the new request to Server B.
+- **Advantages:** Highly efficient at balancing actual load, preventing individual servers from getting overwhelmed.
+- **Disadvantages:** Requires the load balancer to constantly compute and track connection states, adding slight overhead.
+
+#### 3. Least Response Time
+- **Description:** Directs traffic to the server with the fewest active connections *and* the lowest average response time.
+- **Workflow:** The load balancer monitors how quickly each server responds. It combines this speed metric with the active connection count to find the currently "fastest" and "most available" server, routing the next request there.
+- **Advantages:** Excellent for ensuring fast user experiences; automatically shifts traffic away from slow or struggling servers.
+- **Disadvantages:** More complex to compute; temporary network hiccups can heavily skew response time metrics.
+
+#### 4. IP Hash
+- **Description:** Uses a mathematical function (hashing) on the client's IP address to determine which server receives the request.
+- **Workflow:** The user's IP (e.g., `192.168.1.5`) is hashed into a number. That number dictates the server choice. Because the hash function is consistent, the same IP address will *always* be routed to the same server (great for sticky sessions).
+- **Advantages:** Guarantees session persistence (sticky sessions) because a specific user always hits the same server.
+- **Disadvantages:** Can lead to uneven load distribution if a large group of users originates from the same IP network (e.g., a corporate office).
+
+#### 5. Weighted Algorithm (Weighted Round Robin)
+- **Description:** Allows administrators to assign a "weight" (priority or capacity value) to each server based on its hardware capabilities.
+- **Workflow:** If Server A is twice as powerful as Server B, it is given a Weight of 2. The load balancer will then send two requests to Server A for every one request it sends to Server B.
+- **Advantages:** Maximizes resource utilization by intentionally sending more traffic to more powerful hardware.
+- **Disadvantages:** Requires manual configuration and constant tweaking of weights if server specs change.
+
+#### 6. Geographic Routing Algorithm
+- **Description:** Distributes requests based on the physical, geographical location of the user making the request. *(Note: Often what is meant by "graphical" routing).*
+- **Workflow:** A user in Tokyo makes a request. The load balancer detects the location via their IP address and routes the request to the data center physically located in Japan, rather than sending it to a server in New York.
+- **Advantages:** Drastically reduces network latency for global users and helps comply with strict regional data residency laws.
+- **Disadvantages:** Highly complex to set up; relies heavily on accurate DNS resolution and GeoIP databases.
+
+#### 7. Consistent Hashing
+- **Description:** An advanced hashing technique that minimizes the redistribution of traffic when servers are added or removed from the cluster.
+- **Workflow:** Servers and incoming requests are mapped onto a circular "hash ring". A request is routed to the first server it encounters moving clockwise on the ring. If a server goes down, only the traffic meant for that specific server gets reassigned to the next one, leaving the rest of the network's traffic untouched.
+- **Advantages:** Extremely resilient to scaling events; adding or removing nodes only affects a tiny fraction of user sessions.
+- **Disadvantages:** Harder to implement properly; not strictly necessary unless operating at massive scale or dealing with distributed caching.
+
+### Summary Comparison of Load Balancing Algorithms
+
+| Algorithm | Key Characteristic | Main Advantage | Main Disadvantage |
+| :--- | :--- | :--- | :--- |
+| **Round Robin** | Cycles requests sequentially | Simple to implement | Ignores server load and health |
+| **Least Connection** | Routes to fewest active connections | Prevents server overload | Requires connection tracking overhead |
+| **Least Response Time** | Routes to fastest responding server | Optimizes for user speed | Complex to calculate accurately |
+| **IP Hash** | Hashes client IP to assign server | Ensures session persistence | Can cause uneven load distribution |
+| **Weighted Algorithm** | Prioritizes servers based on specs | Maximizes powerful hardware | Requires manual weight configuration |
+| **Geographic Routing** | Routes based on physical location | Minimizes global network latency | Requires complex GeoIP setup |
+| **Consistent Hashing** | Uses a hash ring for assignments | Seamless scaling with minimal disruption | Complex to implement, overkill for small setups |
