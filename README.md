@@ -67,13 +67,13 @@ NoSQL databases provide much more flexibility, as they do not require a fixed sc
         class Document1 {
             _id: "101"
             name: "Alice"
-            age: 28
-            address: { city: "NY" }
+            age: "28"
+            city: "NY"
         }
         class Document2 {
             _id: "102"
             name: "Bob"
-            hobbies: ["Reading", "Gaming"]
+            hobbies: "Reading, Gaming"
         }
     ```
     - **Advantages:** High schema flexibility, easy mapping to application objects, excellent for hierarchical data.
@@ -112,7 +112,7 @@ NoSQL databases provide much more flexibility, as they do not require a fixed sc
         A((Alice)) -- KNOWS --> B((Bob))
         A -- LIVES_IN --> C((New York))
         B -- WORKS_AT --> D((Tech Corp))
-        C <-- LOCATED_IN -- D
+        D -- LOCATED_IN --> C
     ```
     - **Advantages:** Perfectly suited for highly interconnected data (social networks, fraud detection, recommendation engines), lightning-fast relationship traversals.
     - **Disadvantages:** Steeper learning curve (requires query languages like Cypher), harder to scale horizontally compared to other NoSQL databases, overkill for simple tabular data.
