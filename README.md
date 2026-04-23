@@ -76,11 +76,13 @@ NoSQL databases provide much more flexibility, as they do not require a fixed sc
             hobbies: ["Reading", "Gaming"]
         }
     ```
+    - **Advantages:** High schema flexibility, easy mapping to application objects, excellent for hierarchical data.
+    - **Disadvantages:** Poor performance on complex joins across multiple documents, can lead to data duplication.
 
   - **Wide-Column Stores:** Store data in tables, rows, and dynamic columns. Example: **Cassandra/Cosmos DB**
   ![alt text](<Screenshot (13).png>)
     ```mermaid
-    classDiagram`
+    classDiagram
         class RowKey_User1 {
             name: "Alice"
             email: "alice@web.com"
@@ -90,6 +92,8 @@ NoSQL databases provide much more flexibility, as they do not require a fixed sc
             age: "32"
         }
     ```
+    - **Advantages:** Extreme horizontal scalability, extremely fast write performance, built for high availability and big data.
+    - **Disadvantages:** Poor at querying by anything other than the primary key, complex data modeling, not suited for complex aggregations.
 
   - **Key-Value Stores:** Store data as a collection of key-value pairs. Example: **Redis/Memcached**
   ![alt text](<Screenshot (16).png>)
@@ -98,6 +102,8 @@ NoSQL databases provide much more flexibility, as they do not require a fixed sc
         K1["Key: 'session:101'"] --> V1["Value: '{user: 1, active: true}'"]
         K2["Key: 'cart:55'"] --> V2["Value: '{item: laptop, qty: 1}'"]
     ```
+    - **Advantages:** Blazing fast read/write speeds, very simple data model, highly scalable for caching and session management.
+    - **Disadvantages:** Cannot query by the "value", lack of complex query capabilities, not designed for complex relationships.
 
   - **Graph Databases:** Store data in nodes and edges, focusing on relationships. Example: **Neo4j**
   ![alt text](<Screenshot (15).png>)
@@ -108,3 +114,14 @@ NoSQL databases provide much more flexibility, as they do not require a fixed sc
         B -- WORKS_AT --> D((Tech Corp))
         C <-- LOCATED_IN -- D
     ```
+    - **Advantages:** Perfectly suited for highly interconnected data (social networks, fraud detection, recommendation engines), lightning-fast relationship traversals.
+    - **Disadvantages:** Steeper learning curve (requires query languages like Cypher), harder to scale horizontally compared to other NoSQL databases, overkill for simple tabular data.
+
+### Summary Comparison of NoSQL Databases
+
+| NoSQL Type | Data Model | Key Strength | Main Limitation | Best Use Case (When to use) |
+| :--- | :--- | :--- | :--- | :--- |
+| **Document Store** | JSON/BSON Documents | Highly flexible schema, maps easily to code objects | Poor at complex joins and multi-document transactions | Content management, e-commerce catalogs, user profiles |
+| **Wide-Column Store** | Tables with dynamic columns | Extreme write performance and horizontal scalability | Difficult to query by non-primary keys | Time-series data, IoT sensor data, massive logging systems |
+| **Key-Value Store** | Key-Value pairs | Blazing fast read/write speeds, highly scalable | Cannot query by value, very limited query language | Caching (e.g., user sessions), leaderboards, real-time recommendations |
+| **Graph Database** | Nodes and Edges | Lightning-fast complex relationship traversals | Harder to scale horizontally, steep learning curve | Social networks, fraud detection, recommendation engines |
