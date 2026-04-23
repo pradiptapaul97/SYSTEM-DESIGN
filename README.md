@@ -125,3 +125,18 @@ NoSQL databases provide much more flexibility, as they do not require a fixed sc
 | **Wide-Column Store** | Tables with dynamic columns | Extreme write performance and horizontal scalability | Difficult to query by non-primary keys | Time-series data, IoT sensor data, massive logging systems |
 | **Key-Value Store** | Key-Value pairs | Blazing fast read/write speeds, highly scalable | Cannot query by value, very limited query language | Caching (e.g., user sessions), leaderboards, real-time recommendations |
 | **Graph Database** | Nodes and Edges | Lightning-fast complex relationship traversals | Harder to scale horizontally, steep learning curve | Social networks, fraud detection, recommendation engines |
+
+---
+
+## When to Choose Relational vs. Non-Relational
+
+### Choose a Relational Database (RDBMS) when:
+1. **Well-Structured Data & Clear Relationships:** Your data is highly structured and entities have strict relationships.
+   - *Example:* An e-commerce app tracking customers and orders.
+2. **Strong Consistency & Transactional Integrity:** You require strict data integrity and cannot afford any anomalies (ACID compliance).
+   - *Example:* A financial application or banking system.
+
+### Choose a Non-Relational Database (NoSQL) when:
+1. **Super Low Latency:** You need incredibly rapid, quick responses for read and write operations.
+2. **Unstructured & Semi-Structured Data:** Your data does not fit into rigid tables and schemas frequently change.
+3. **Massive Data Volumes:** You require highly scalable storage capable of handling massive amounts of traffic and data across distributed servers.
