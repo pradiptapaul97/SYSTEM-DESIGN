@@ -475,3 +475,82 @@ message UserResponse {
 Often called "Reverse APIs," webhooks allow a server to push real-time data to a client automatically when a specific event occurs (e.g., a payment is completed), rather than the client constantly polling the server for updates.
 
 ![alt text](<Screenshot (34).png>)
+
+![alt text](<Screenshot (36).png>)
+
+---
+
+## The API Design Process: A 4-Step Framework
+
+Before writing a single line of code or defining an endpoint, an architect must think through the system's requirements. This structured approach ensures the API is functional, scalable, and secure.
+
+### Step 1: Identify Core Use Cases & User Stories
+**The Goal:** Understand exactly what the users (and other systems) are trying to achieve.
+
+- **The Question:** *"What are the specific actions a user needs to perform?"*
+- **E-commerce Example:**
+    - User can browse products.
+    - User can add items to a cart.
+    - Admin can manage inventory levels.
+- **API Choice Insight:**
+    - **REST:** Ideal for standard CRUD operations (Products, Orders).
+    - **GraphQL:** Best if the frontend requires flexible, varying data structures.
+    - **gRPC:** Best for internal service orchestration (Order → Payment → Inventory).
+
+### Step 2: Define Scope & Boundaries
+**The Goal:** Establish clear responsibilities for each service and endpoint (Microservices approach).
+
+- **The Question:** *"What does this API handle, and what is outside its responsibility?"*
+- **Example:**
+    - **Product Service:** Handles `/products` ONLY.
+    - **Order Service:** Handles `/orders` ONLY.
+- **API Choice Insight:**
+    - **REST:** Provides clean, predictable boundaries for public APIs.
+    - **gRPC:** The industry standard for service-to-service communication within the same boundary.
+    - **GraphQL:** Can serve as a **BFF (Backend-for-Frontend)** layer, aggregating data from multiple services.
+
+### Step 3: Determine Performance Requirements
+**The Goal:** Select the right communication protocol based on speed and real-time needs.
+
+- **The Question:** *"How many concurrent users are expected, and how fast must the response be?"*
+- **Comparison of Performance Profiles:**
+    - **Social Media Feed:** Needs high flexibility + fast loading → **GraphQL** (reduces round trips).
+    - **Inter-Service Payments:** Needs extreme low latency + reliability → **gRPC** (binary serialization).
+    - **Live Stock Prices:** Needs real-time streaming → **WebSockets**.
+    - **Simple Admin Dashboard:** Simple CRUD without strict latency needs → **REST** (cache-friendly).
+
+### Step 4: Consider Security Constraints
+**The Goal:** Ensure the data is protected and access is restricted based on roles.
+
+- **The Question:** *"Who can access this data, and how do we prevent abuse (like DDoS or data leaks)?"*
+- **Architectural Security Patterns:**
+    - **REST/GraphQL:** Typically secured via **JWT (JSON Web Tokens)** or **OAuth2** in HTTP headers.
+    - **gRPC:** Often uses **mTLS (Mutual TLS)** for highly secure service-to-service authentication.
+    - **WebSockets:** Requires token validation during the initial "handshake" before a long-lived connection is established.
+
+---
+
+### Real-World Case Study: Food Delivery App
+
+| Phase | Strategy | API Selection |
+| :--- | :--- | :--- |
+| **Step 1: Use Cases** | Browse menus, place orders, track drivers in real-time. | Mixed Stack |
+| **Step 2: Boundaries** | Separate services for Restaurants, Orders, and Delivery. | Microservices |
+| **Step 3: Performance** | Use gRPC for backend calls; WebSockets for live driver location. | **gRPC & WebSockets** |
+| **Step 4: Security** | Role-based access for Users, Drivers, and Partners. | **JWT & HTTPS** |
+
+---
+
+### 🧠 The Architectural Mental Model
+
+- **Use Cases** → Defines **WHAT** the API does.
+- **Scope** → Defines **WHERE** the boundaries are.
+- **Performance** → Defines **HOW FAST** it responds.
+- **Security** → Defines **HOW SAFE** the data remains.
+
+**Final Takeaway for Developers:**
+A strong modern architecture often uses **all styles together**:
+- **Frontend** connects to a **GraphQL** gateway for flexible queries.
+- **Gateway** connects to **REST** APIs for business logic.
+- **Microservices** communicate internally via **gRPC** for maximum speed.
+- **Real-time features** (Chat, Tracking) use **WebSockets**.
