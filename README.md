@@ -342,3 +342,73 @@ Modern distributed systems prioritize **Resilience by Design** through automated
 - **Auto-Scaling & Auto-Provisioning:** By utilizing cloud-native services like **AWS Auto Scaling Groups** or **Kubernetes Controllers**, the system can automatically detect the loss of a node.
 - **Automated Instance Replacement:** Instead of requiring manual intervention, the platform terminates the unhealthy instance and immediately provisions a fresh, pre-configured load balancer from a standard image (AMI or Container). This ensures the system "heals" itself back to its target state within seconds, minimizing the window of vulnerability.
 
+---
+
+## API (Application Programming Interface)
+
+An **API (Application Programming Interface)** is a set of defined rules and protocols that allow different software applications to communicate and exchange data with each other. In modern system design, APIs serve as the "connective tissue" between decoupled services, enabling them to work together as a unified platform.
+
+### What is an API? (The Technical Definition)
+At its core, an API acts as a formal contract between a **provider** (the server) and a **consumer** (the client). It abstracts the underlying complexity of the system, allowing developers to interact with services without needing to understand their internal code or database structure.
+
+#### The Request-Response Cycle
+Communication through an API typically follows a structured cycle:
+1. **Request:** The client sends a structured message to an endpoint (e.g., `GET /v1/users/101`).
+2. **Processing:** The server validates the request, checks for authorization, executes business logic, and retrieves data from the Data Tier.
+3. **Response:** The server returns an HTTP status code (e.g., `200 OK`) along with the requested payload, usually formatted as **JSON** or **XML**.
+
+---
+
+### Core Components of an API Interaction
+To design or consume APIs effectively, developers must master these four primary components:
+
+| Component | Description | Example |
+| :--- | :--- | :--- |
+| **Endpoint** | The specific URL or address where the API resource resides. | `https://api.myapp.com/v1/orders` |
+| **HTTP Method** | The verb that defines the type of action to be performed. | `GET` (Read), `POST` (Create), `DELETE` (Remove) |
+| **Headers** | Metadata providing context about the request or the client. | `Authorization: Bearer <token>`, `Content-Type: application/json` |
+| **Body (Payload)** | The actual data sent to the server (usually for creation or updates). | `{"product_id": 55, "quantity": 2}` |
+
+---
+
+### Popular API Architectures
+
+![alt text](<Screenshot (33).png>)
+
+#### 1. REST (Representational State Transfer)
+The most widely used architecture for web services. It is based on standard HTTP protocols and emphasizes **statelessness**, where each request contains all the information needed to fulfill it.
+
+##### Understanding "Resource-Based" Design
+In REST, everything is treated as a **Resource**. A resource is any object, data, or service that can be accessed by a client (e.g., a User, an Order, or a Product).
+
+- **The URI as an Identity:** Every resource is identified by a unique **URI (Uniform Resource Identifier)**. Instead of calling a function like `getUser(id)`, you access a path that represents the user entity.
+- **Nouns vs. Verbs:** RESTful URIs should always use **nouns** to represent resources, never verbs. The action to be performed is determined by the **HTTP Method** (the verb), not the URL.
+
+| Action | Professional REST (Resource-Based) | Unprofessional (Action-Based) |
+| :--- | :--- | :--- |
+| **Get all users** | `GET /users` | `GET /getAllUsers` |
+| **Get a specific user** | `GET /users/123` | `GET /getUser?id=123` |
+| **Create a user** | `POST /users` | `POST /createUser` |
+| **Delete a user** | `DELETE /users/123` | `POST /deleteUser/123` |
+
+##### Collections and Sub-Resources
+Resources can be grouped into collections or nested to show relationships:
+- **Collection:** `/products` refers to the entire list of products.
+- **Individual Resource:** `/products/55` refers to a specific product.
+- **Sub-Resource:** `/users/123/orders` refers to all orders belonging to user 123.
+
+##### Understanding "Statelessness"
+In a **Stateless** architecture, the server does not store any information about the client's state or previous interactions. Each request from a client to a server must be "self-contained."
+
+- **Self-Contained Requests:** Every single request must include all the information the server needs to process it—including authentication tokens, parameters, and the desired action. The server doesn't "remember" that you logged in during the previous request.
+- **Authentication via Tokens:** Because the server is stateless, it doesn't use traditional server-side sessions. Instead, clients typically send an **Authorization Header** (e.g., a **JWT** or **Bearer Token**) with every single request to prove their identity.
+- **Impact on Scalability:** Statelessness is a key reason why REST APIs are so scalable. Since any server in a pool can handle any request (because no session data is stored locally), you can add or remove servers behind a load balancer without ever worrying about "session stickiness" or synchronizing user data across nodes.
+
+#### 2. GraphQL
+Developed by Meta, GraphQL allows clients to request exactly the data they need and nothing more. This eliminates "over-fetching" and is ideal for complex systems with deeply nested data relationships.
+
+#### 3. gRPC (Google Remote Procedure Call)
+A high-performance framework that uses **Protocol Buffers** (a binary serialization format) instead of JSON. It is primarily used for lightning-fast communication between microservices.
+
+#### 4. Webhooks
+Often called "Reverse APIs," webhooks allow a server to push real-time data to a client automatically when a specific event occurs (e.g., a payment is completed), rather than the client constantly polling the server for updates.
