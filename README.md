@@ -407,8 +407,71 @@ In a **Stateless** architecture, the server does not store any information about
 #### 2. GraphQL
 Developed by Meta, GraphQL allows clients to request exactly the data they need and nothing more. This eliminates "over-fetching" and is ideal for complex systems with deeply nested data relationships.
 
+##### Minimizing Network Round Trips
+In traditional REST architectures, fetching a complex set of related data often requires multiple requests (round trips) to the server. For example, to display a user's profile with their last 5 orders, you might need:
+1. `GET /users/1`
+2. `GET /users/1/orders`
+
+With **GraphQL**, you can consolidate these into a **single network round trip**. The client sends a specific query describing the exact structure of the data it needs:
+
+```graphql
+query {
+  user(id: "1") {
+    name
+    email
+    orders(last: 5) {
+      id
+      total_price
+      status
+    }
+  }
+}
+```
+
+##### Solving Over-fetching and Under-fetching
+- **Under-fetching:** Occurs in REST when an endpoint doesn't return enough data, forcing the client to make additional requests (increasing latency). GraphQL solves this by allowing nested resource fetching.
+- **Over-fetching:** Occurs in REST when an endpoint returns a massive JSON object with fields the client doesn't need (wasting bandwidth). GraphQL solves this by allowing the client to specify only the fields it intends to use.
+
 #### 3. gRPC (Google Remote Procedure Call)
 A high-performance framework that uses **Protocol Buffers** (a binary serialization format) instead of JSON. It is primarily used for lightning-fast communication between microservices.
 
+##### Understanding Protocol Buffers (Protobuf)
+Protocol Buffers are gRPC's **Interface Definition Language (IDL)**. They define how data is structured and how services interact.
+
+- **Binary Serialization:** Unlike REST (which uses text-based JSON), Protobuf is a **binary format**. This makes the data significantly smaller and much faster to serialize/deserialize, resulting in lower latency and reduced bandwidth usage.
+- **Strongly Typed & Schema-First:** You must define your data structure in a `.proto` file before writing any code. This ensures that both the client and server agree on the data format, reducing runtime errors.
+
+##### Example of a `.proto` Definition
+This file defines a service and the structure of the messages it exchanges:
+
+```protobuf
+syntax = "proto3"; // Using the latest version of Protobuf
+
+// Define the service and its methods
+service UserService {
+  // A simple RPC: Client sends a request, Server returns a response
+  rpc GetUser (UserRequest) returns (UserResponse);
+}
+
+// Define the request message
+message UserRequest {
+  string user_id = 1; // The number '1' is a unique tag for binary mapping
+}
+
+// Define the response message
+message UserResponse {
+  string name = 1;
+  string email = 2;
+  int32 age = 3;
+}
+```
+
+##### Why use gRPC over REST?
+- **Speed:** Binary format is 5x to 10x faster than JSON.
+- **Streaming:** Supports bidirectional streaming (client and server can send a stream of messages simultaneously).
+- **Code Generation:** Protobuf automatically generates client and server code in multiple languages (Java, Python, Go, Node.js, etc.) based on the `.proto` file.
+
 #### 4. Webhooks
 Often called "Reverse APIs," webhooks allow a server to push real-time data to a client automatically when a specific event occurs (e.g., a payment is completed), rather than the client constantly polling the server for updates.
+
+![alt text](<Screenshot (34).png>)
