@@ -812,6 +812,8 @@ In system design, these two terms are often confused but serve very different pu
 
 ![alt text](<Screenshot (63).png>)
 
+### Basic Authentication Methods
+
 #### 1. Basic Authentication
 The client sends the username and password in the HTTP `Authorization` header, encoded as **Base64**.
 
