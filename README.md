@@ -795,6 +795,8 @@ Instead of skipping a number of rows, you use a "pointer" (cursor) to the last i
 ### Authentication (AuthN)
 **The Philosophy:** "Who are you?" Authentication is the process of verifying that a user or system is who they claim to be.
 
+![alt text](<Screenshot (62).png>)
+
 #### Authentication vs. Authorization (The Key Difference)
 In system design, these two terms are often confused but serve very different purposes.
 
@@ -807,6 +809,8 @@ In system design, these two terms are often confused but serve very different pu
 
 
 ### Authentication Methods
+
+![alt text](<Screenshot (63).png>)
 
 #### 1. Basic Authentication
 The client sends the username and password in the HTTP `Authorization` header, encoded as **Base64**.
