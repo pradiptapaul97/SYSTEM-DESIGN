@@ -622,3 +622,21 @@ Mature engineering teams often combine these three approaches into a high-perfor
 - If you think like a **Product Engineer** → You prefer **Top-Down**.
 - If you think like a **Database Engineer** → You prefer **Bottom-Up**.
 - If you think like a **System Architect** → You prefer **Contract-First**.
+
+---
+
+## API Communication Protocols (Real-time APIs)
+
+![alt text](<Screenshot (46)-1.png>)
+
+![alt text](<Screenshot (47).png>)
+
+![alt text](<Screenshot (48).png>)
+
+![alt text](<Screenshot (49).png>)
+
+![alt text](<Screenshot (50).png>)
+
+![alt text](<Screenshot (53).png>)
+
+![alt text](<Screenshot (54).png>)
