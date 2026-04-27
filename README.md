@@ -640,3 +640,73 @@ Mature engineering teams often combine these three approaches into a high-perfor
 ![alt text](<Screenshot (53).png>)
 
 ![alt text](<Screenshot (54).png>)
+
+---
+
+## Transport Layer Protocols: TCP vs. UDP
+
+The **Transport Layer** is responsible for end-to-end communication and data transfer between applications. In system design, choosing between **TCP** and **UDP** depends entirely on whether your application prioritizes **Reliability** or **Speed**.
+
+### 1. TCP (Transmission Control Protocol)
+**The Philosophy:** "Slow but Steady." TCP ensures that every packet sent is received correctly and in the exact order it was sent.
+
+- **Connection-Oriented:** Before any data is sent, TCP establishes a formal connection between the sender and receiver using a **3-Way Handshake**.
+- **Reliable & Ordered:** If a packet is lost, TCP automatically detects it and retransmits it. It also reassembles packets in the correct order if they arrive out of sequence.
+- **Flow Control & Congestion Control:** TCP slows down the transmission if the network is congested or if the receiver is overwhelmed.
+
+#### The TCP 3-Way Handshake
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Server
+    Client->>Server: SYN (Let's connect!)
+    Server-->>Client: SYN-ACK (I'm ready, let's go!)
+    Client->>Server: ACK (Great! Connection Established)
+```
+
+- **Best For:** Applications where data integrity is critical. (e.g., Web Browsing, Email, Database queries).
+
+---
+
+### 2. UDP (User Datagram Protocol)
+**The Philosophy:** "Fast and Furious." UDP sends data packets (datagrams) as quickly as possible without checking if they ever arrived.
+
+- **Connectionless:** There is no handshake. Data is simply "fired" at the receiver's IP address.
+- **Unreliable & Unordered:** If a packet is lost, it is gone forever. Packets may also arrive in any order.
+- **Low Overhead:** Because it doesn't track connections or retransmit data, UDP is significantly faster and uses less bandwidth than TCP.
+
+#### The UDP Workflow
+```mermaid
+graph LR
+    Sender((Sender)) -- "Packet 1" --> Receiver((Receiver))
+    Sender -- "Packet 2" --> Receiver
+    Sender -- "Packet 3 (LOST)" -.-> X[X]
+    Sender -- "Packet 4" --> Receiver
+```
+
+- **Best For:** Applications where speed and low latency are more important than perfect data (e.g., Live Streaming, VoIP, Online Gaming).
+
+---
+
+### Comparison: TCP vs. UDP
+
+| Feature | TCP (Reliable) | UDP (Fast) |
+| :--- | :--- | :--- |
+| **Connection** | Connection-Oriented (3-Way Handshake) | Connectionless (No Handshake) |
+| **Reliability** | **Guaranteed Delivery** (Retransmits lost data) | **No Guarantee** (Lost data is gone) |
+| **Ordering** | Delivers data in the exact order sent | Data can arrive in any order |
+| **Speed** | Slower (due to overhead and checking) | **Blazing Fast** (minimal overhead) |
+| **Header Size** | Large (20 - 60 Bytes) | Small (8 Bytes) |
+| **Flow Control** | Yes (Prevents overwhelming the receiver) | No (Fire and forget) |
+
+### 🚀 When to Use Which? (System Design Scenarios)
+
+#### Use TCP when you need **Data Integrity**:
+- **HTTP / HTTPS:** Browsing the web requires every image and text block to load correctly.
+- **SSH / FTP:** Remote access and file transfers cannot afford corrupted or missing files.
+- **SMTP (Email):** You want to ensure the entire message reaches the recipient.
+
+#### Use UDP when you need **Real-time Speed**:
+- **Online Gaming:** If you lose a "packet" representing a player's movement, you don't want the game to freeze while it's retransmitted; you just want the next movement update.
+- **Video Conferencing / VoIP:** A tiny bit of "lag" or "glitch" in audio is better than the entire call pausing to buffer a lost packet.
+- **DNS (Domain Name System):** Requests are small and need to be fast. If a DNS request fails, the browser just tries again.
