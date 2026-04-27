@@ -808,39 +808,107 @@ In system design, these two terms are often confused but serve very different pu
 
 ### Authentication Methods
 
-![alt text](<Screenshot (63).png>)
-
 #### 1. Basic Authentication
-The simplest form of authentication where the client sends the username and password in the HTTP header.
-- **How it works:** The credentials are Base64 encoded and sent as `Authorization: Basic <credentials>`.
-- **Pros:** Very easy to implement.
-- **Cons:** Extremely insecure unless used over HTTPS (as credentials can be easily decoded). No built-in way to log out.
+The client sends the username and password in the HTTP `Authorization` header, encoded as **Base64**.
 
-#### 2. Session-based Authentication (Stateful)
-The server maintains a record of the user's session in its memory or a database.
-- **How it works:** User logs in → Server creates a **Session ID** → Server stores it (e.g., in Redis) → Server sends the ID to the client via a **Set-Cookie** header → Client sends the cookie back with every request.
-- **Pros:** Secure (sensitive data stays on the server); easy to revoke sessions immediately.
-- **Cons:** Harder to scale horizontally (requires session synchronization or "sticky sessions"); uses server-side memory.
+**Graphical Workflow:**
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Server
+    Client->>Server: GET /resource (Authorization: Basic dXNlcjpwYXNz)
+    Server->>Server: Base64 Decode & Verify DB
+    Server-->>Client: 200 OK (Resource Data)
+```
 
-#### 3. Token-based Authentication (Stateless / JWT)
-The server does not store session data. Instead, the client carries all the necessary identity information in a signed token.
-- **How it works:** User logs in → Server creates a **JWT (JSON Web Token)** → Server signs it with a secret key → Server sends it to the client → Client sends it back in the `Authorization: Bearer <token>` header.
-- **Pros:** **Highly Scalable** (any server can verify the token without checking a database); works across different domains/services.
-- **Cons:** Tokens cannot be easily revoked before they expire; if a token is stolen, it can be used until it's dead.
-
-#### 4. OAuth 2.0 & OpenID Connect (OIDC)
-A framework for **delegated authentication**.
-- **How it works:** Instead of giving your password to a new app, you "Login with Google/GitHub." The app gets an **Access Token** from the provider to act on your behalf.
-- **Best For:** Third-party integrations and Single Sign-On (SSO).
+- **Pros:** Extremely simple to implement; supported by all browsers.
+- **Cons:** **Insecure** (Credentials are sent in plain-text Base64); no session logout mechanism.
+- **Test Cases:**
+    - [ ] **TC-1:** Verify access with correct `username:password` (Expect 200 OK).
+    - [ ] **TC-2:** Verify access with incorrect credentials (Expect 401 Unauthorized).
+    - [ ] **TC-3:** Verify access with missing Authorization header (Expect 401 Unauthorized).
 
 ---
 
-### Comparison: Session vs. Token Authentication
+#### 2. Digest Authentication
+A more secure alternative to Basic Auth that uses a **challenge-response** mechanism to avoid sending passwords in plain text.
 
-| Feature | Session-based (Cookies) | Token-based (JWT) |
-| :--- | :--- | :--- |
-| **Storage** | Server-side (DB/Redis) | **Client-side** (Local Storage/Cookie) |
-| **Scalability** | Harder (requires state management) | **Excellent (Stateless)** |
-| **Revocation** | Easy (just delete the session) | Hard (requires blacklisting or short TTLs) |
-| **Mobile Friendly** | No (Mobile apps handle cookies poorly) | **Yes (Standard for Mobile/APIs)** |
-| **Best For** | Traditional Web Apps | **Modern Microservices / Mobile Apps** |
+**Graphical Workflow:**
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Server
+    Client->>Server: GET /resource
+    Server-->>Client: 401 Unauthorized (WWW-Authenticate: Digest nonce="abc...")
+    Note over Client: Hash(User + Pass + Nonce)
+    Client->>Server: GET /resource (Authorization: Digest response="hash...")
+    Server-->>Client: 200 OK
+```
+
+- **Pros:** Password is never sent over the wire; more resilient to replay attacks (using nonces).
+- **Cons:** Vulnerable to Man-in-the-Middle if not using HTTPS; harder to implement than Basic Auth.
+- **Test Cases:**
+    - [ ] **TC-1:** Verify server sends `401` with `nonce` on first request.
+    - [ ] **TC-2:** Verify client generates correct MD5 hash and gets `200 OK`.
+    - [ ] **TC-3:** Verify request fails if `nonce` is stale or reused.
+
+---
+
+#### 3. API Keys
+A long-lived unique string (identifier) assigned to a user or service, typically passed in a header or query parameter.
+
+**Graphical Workflow:**
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Server
+    Client->>Server: GET /api/v1/data (X-API-KEY: my-secret-key)
+    Server->>Server: Look up Key in Database/Cache
+    Server-->>Client: 200 OK
+```
+
+- **Pros:** Simple for machine-to-machine communication; easy to rate-limit per key.
+- **Cons:** If leaked, the key provides full access until manually revoked; keys are often stored in plain text by clients.
+- **Test Cases:**
+    - [ ] **TC-1:** Verify valid API Key allows access.
+    - [ ] **TC-2:** Verify invalid/deleted API Key returns `403 Forbidden`.
+    - [ ] **TC-3:** Verify rate-limiting works when a key exceeds its quota.
+
+---
+
+#### 4. Session-based Authentication
+The server creates a session for the user after login and stores it (usually in a DB or Redis), sending a **Session ID** back to the client via a cookie.
+
+**Graphical Workflow:**
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Server
+    participant Redis
+    Client->>Server: POST /login (user/pass)
+    Server->>Redis: Store Session {id: 123, user: 'alice'}
+    Server-->>Client: 200 OK (Set-Cookie: session_id=123)
+    Note over Client: Subsequent Request
+    Client->>Server: GET /dashboard (Cookie: session_id=123)
+    Server->>Redis: Get Session 123
+    Server-->>Client: 200 OK
+```
+
+- **Pros:** Secure (sensitive data stays on server); sessions can be easily revoked (e.g., "Logout from all devices").
+- **Cons:** Stateful (hurts horizontal scaling); vulnerable to CSRF (Cross-Site Request Forgery).
+- **Test Cases:**
+    - [ ] **TC-1:** Verify Session ID is generated and stored upon login.
+    - [ ] **TC-2:** Verify accessing protected route without a cookie returns `401`.
+    - [ ] **TC-3:** Verify session is deleted from the store upon logout.
+
+---
+
+### Comparison Table: 4 Types of Authentication
+
+| Feature | Basic Auth | Digest Auth | API Keys | Session-based |
+| :--- | :--- | :--- | :--- | :--- |
+| **Storage** | None (Send every time) | None (Send every time) | Persistent Key | **Server-side (Stateful)** |
+| **Security** | Low (Plaintext-like) | Medium (Hashed) | Medium (Secret Key) | **High (Server-controlled)** |
+| **Complexity**| Very Low | Medium | Low | High |
+| **Scalability** | High | High | High | Low (Requires Shared Store) |
+| **Best For** | Internal testing | Legacy systems | Public APIs | **Web Applications** |
