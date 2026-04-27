@@ -1005,5 +1005,66 @@ sequenceDiagram
 | **Complexity** | Low | **High** |
 | **Best For** | Simple APIs / Internal tools | **Secure Web & Mobile Apps** |
 
-### OAuth2 and ODIC Authentication Methods
+### OAuth2 and OIDC Authentication Framework
+
+![alt text](<Screenshot (68).png>)
+
+![alt text](<Screenshot (69).png>)
+
+**OAuth 2.0** is an **authorization** framework that allows an application to access resources on behalf of a user without seeing their password. **OpenID Connect (OIDC)** is a simple **identity** layer on top of OAuth 2.0 that allows the app to verify the identity of the user.
+
+- **OAuth2 (Authorization):** "Can I access your Google Photos for you?" (Valet Key).
+- **OIDC (Authentication):** "Who are you exactly?" (ID Card).
+
+#### Core Roles in OAuth2/OIDC:
+1. **Resource Owner:** The User (e.g., You).
+2. **Client:** The Application (e.g., Canva).
+3. **Authorization Server:** The Identity Provider (e.g., Google, GitHub).
+4. **Resource Server:** The API containing the data (e.g., Google Photos API).
+
+---
+
+#### The Authorization Code Flow (Most Secure)
+This is the standard flow for most web and mobile applications.
+
+**Graphical Workflow:**
+```mermaid
+sequenceDiagram
+    participant User
+    participant Client as App (Canva)
+    participant AuthServer as Auth Server (Google)
+    
+    User->>Client: Click "Login with Google"
+    Client->>User: Redirect to Google Login
+    User->>AuthServer: Enter Credentials & Consent
+    AuthServer-->>Client: Send Authorization Code
+    Client->>AuthServer: Exchange Code for Tokens (+ Client Secret)
+    AuthServer-->>Client: Issue ID Token (OIDC) & Access Token (OAuth2)
+    Client->>User: Login Successful
+```
+
+- **Pros:** **Highly Secure** (Credentials never touch the app); users don't need to create new accounts (SSO).
+- **Cons:** Very complex to implement from scratch; requires multiple network round trips.
+- **Test Cases:**
+    - [ ] **TC-1:** Verify redirection to the correct Identity Provider (IDP) URL.
+    - [ ] **TC-2:** Verify `code` is exchanged for tokens correctly.
+    - [ ] **TC-3:** Verify `ID Token` contains correct user claims (email, name).
+    - [ ] **TC-4:** Verify that an invalid or reused `code` is rejected.
+
+---
+
+### Comparison: OAuth2 vs. OIDC
+
+| Feature | OAuth 2.0 | OIDC (OpenID Connect) |
+| :--- | :--- | :--- |
+| **Primary Goal** | **Authorization** (Access) | **Authentication** (Identity) |
+| **Token Issued** | **Access Token** | **ID Token** (and Access Token) |
+| **Token Format** | Any (often opaque or JWT) | **Strictly JWT** |
+| **Information** | Permissions (Scopes) | User Profile (Claims like email, sub) |
+| **Analogy** | A key to a specific room | A passport verifying who you are |
+
+### 🚀 When to Use?
+- **Use OAuth2** when you want one app to access data in another app (e.g., Buffer posting to your Twitter).
+- **Use OIDC** when you want a "Login with X" button to handle user registration and login.
+
 
