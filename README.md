@@ -1101,3 +1101,79 @@ sequenceDiagram
     - [ ] **TC-3:** Verify user is denied access if Assertion is tampered with.
 
 ---
+
+## Authorization Models: ACL, RBAC, and ABAC
+
+While **Authentication** verifies *who you are*, **Authorization** determines *what you can do*. There are three primary models used to manage these permissions.
+
+### 1. ACL (Access Control List)
+**The Philosophy:** A simple list attached to a resource (file, folder, or API) that specifies which users have what permissions.
+
+**Graphical Workflow:**
+```mermaid
+graph LR
+    User1[Alice] -- Read/Write --> File1((File_A))
+    User2[Bob] -- Read Only --> File1
+    User3[Charlie] -- No Access --> File1
+```
+
+- **Pros:** Extremely simple to understand and implement for small systems.
+- **Cons:** Hard to manage at scale (If you have 1,000 files and 1,000 users, the list becomes massive).
+- **Test Cases:**
+    - [ ] **TC-1:** Verify Alice can write to File_A.
+    - [ ] **TC-2:** Verify Charlie is blocked from reading File_A.
+
+---
+
+### 2. RBAC (Role-Based Access Control)
+**The Philosophy:** Permissions are assigned to **Roles**, and Roles are assigned to **Users**. This is the industry standard for most enterprise applications.
+
+**Graphical Workflow:**
+```mermaid
+graph TD
+    U1[Alice] --> R1(Admin)
+    U2[Bob] --> R2(Editor)
+    U3[Charlie] --> R2
+    
+    R1 --> P1[Delete User]
+    R1 --> P2[Edit Post]
+    R2 --> P2
+```
+
+- **Pros:** Easy to manage large groups of users; changing a role's permissions affects everyone in that role.
+- **Cons:** **Role Explosion:** You might end up with too many roles (e.g., `Editor_Level_1`, `Editor_Level_2_Finance`).
+- **Test Cases:**
+    - [ ] **TC-1:** Verify a user with "Admin" role can delete another user.
+    - [ ] **TC-2:** Verify a user with "Editor" role cannot delete users but can edit posts.
+
+---
+
+### 3. ABAC (Attribute-Based Access Control)
+**The Philosophy:** Decisions are made dynamically based on **Attributes** (User attributes, Resource attributes, and Environment attributes).
+
+**Graphical Workflow:**
+```mermaid
+flowchart LR
+    A[User: Alice<br/>Dept: HR] --> E{Policy Engine}
+    B[Resource: Payroll<br/>Class: Confidential] --> E
+    C[Env: Time 10AM<br/>IP: Office] --> E
+    E -- Match? --> D[Grant Access]
+```
+
+- **Pros:** **Extremely Granular** (e.g., "Allow access only during office hours from an office IP"); highly flexible.
+- **Cons:** Very complex to implement and maintain; can be slow because every request requires complex policy evaluation.
+- **Test Cases:**
+    - [ ] **TC-1:** Verify HR user can access Payroll during work hours.
+    - [ ] **TC-2:** Verify HR user is denied access to Payroll from a home IP address.
+
+---
+
+### Comparison: ACL vs. RBAC vs. ABAC
+
+| Feature | ACL | RBAC | ABAC |
+| :--- | :--- | :--- | :--- |
+| **Control Unit** | Individual User | **Role / Group** | **Attributes / Context** |
+| **Granularity** | Low | Medium | **Very High (Dynamic)** |
+| **Scalability** | Low | High | **Extremely High** |
+| **Complexity** | Very Low | Low | High |
+| **Best For** | File systems, simple apps | **Enterprise apps, SaaS** | **High-security, dynamic systems** |
