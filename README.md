@@ -1177,3 +1177,161 @@ flowchart LR
 | **Scalability** | Low | High | **Extremely High** |
 | **Complexity** | Very Low | Low | High |
 | **Best For** | File systems, simple apps | **Enterprise apps, SaaS** | **High-security, dynamic systems** |
+
+---
+
+## API Security: 7 Essential Protection Techniques
+
+Protecting an API requires a multi-layered defense strategy. Below are 7 critical techniques to secure your system from common vulnerabilities and attacks.
+
+### 1. Rate Limiting (Throttling)
+**The Goal:** Prevent abuse and DoS (Denial of Service) attacks by limiting how many requests a user or IP can make in a specific timeframe.
+
+**Graphical Workflow:**
+```mermaid
+flowchart TD
+    Request[Incoming Request] --> Bucket{Is Bucket Empty?}
+    Bucket -- No --> Allow[Allow Request & -1 Token]
+    Bucket -- Yes --> Block[429 Too Many Requests]
+```
+
+- **Pros:** Protects server resources; prevents brute-force attacks.
+- **Cons:** Can block legitimate heavy users if limits are too strict.
+- **Test Cases:**
+    - [ ] **TC-1:** Verify 10 requests within 1 minute are allowed (if limit is 10).
+    - [ ] **TC-2:** Verify the 11th request is blocked with a `429` status code.
+
+---
+
+### 2. CORS (Cross-Origin Resource Sharing)
+**The Goal:** A browser-level security mechanism that restricts which domains (origins) are allowed to access your API resources.
+
+**Graphical Workflow:**
+```mermaid
+sequenceDiagram
+    participant Browser
+    participant API
+    Browser->>API: OPTIONS /resource (Preflight)
+    API-->>Browser: 200 OK (Access-Control-Allow-Origin: myapp.com)
+    Browser->>API: GET /resource
+    API-->>Browser: 200 OK
+```
+
+- **Pros:** Prevents malicious websites from making unauthorized requests to your API.
+- **Cons:** Can be difficult to configure and debug; doesn't protect against non-browser clients (like Postman).
+- **Test Cases:**
+    - [ ] **TC-1:** Verify a request from a "Whitelisted" domain succeeds.
+    - [ ] **TC-2:** Verify a request from a "Blacklisted" domain is blocked by the browser.
+
+---
+
+### 3. SQL & NoSQL Injection Prevention
+**The Goal:** Prevent attackers from executing malicious database commands by injecting code into input fields.
+
+**Graphical Workflow:**
+```mermaid
+graph LR
+    Input[User Input: ' OR 1=1 --] --> Sanitizer{Sanitization / ORM}
+    Sanitizer -- Escaped --> DB[(Database)]
+    Note right of Sanitizer: Converts ' to \' and handles parameters
+```
+
+- **Pros:** Protects the most sensitive part of the system (the data).
+- **Cons:** Requires strict developer discipline to never use raw strings in queries.
+- **Test Cases:**
+    - [ ] **TC-1:** Verify that entering `' OR 1=1 --` in a login field does not bypass authentication.
+    - [ ] **TC-2:** Verify that special characters in input are correctly escaped in the database.
+
+---
+
+### 4. WAF (Web Application Firewall)
+**The Goal:** An edge security layer that filters, monitors, and blocks malicious HTTP traffic (like the OWASP Top 10) before it even reaches your server.
+
+**Graphical Workflow:**
+```mermaid
+flowchart LR
+    Internet((Internet)) --> WAF{WAF Filter}
+    WAF -- Safe --> Server[App Server]
+    WAF -- Malicious --> Blocked[Dropped]
+```
+
+- **Pros:** Hands-off protection; blocks bots and known attack patterns automatically.
+- **Cons:** Can cause false positives (blocking legitimate traffic that "looks" like an attack).
+- **Test Cases:**
+    - [ ] **TC-1:** Verify that common SQLi or XSS patterns are automatically blocked at the edge.
+    - [ ] **TC-2:** Verify that normal user traffic passes through without latency.
+
+---
+
+### 5. VPNs (Virtual Private Networks)
+**The Goal:** Restrict API access to a private network, requiring users to be connected to a secure tunnel.
+
+**Graphical Workflow:**
+```mermaid
+graph LR
+    User -- Public Web --> X[X Blocked]
+    User -- Encrypted Tunnel --> VPN((VPN Gateway))
+    VPN --> InternalAPI[Private API Server]
+```
+
+- **Pros:** Maximum security for internal/admin APIs; data is encrypted during transit.
+- **Cons:** High management overhead; adds latency; complex for end-users to set up.
+- **Test Cases:**
+    - [ ] **TC-1:** Verify API is unreachable from the public internet.
+    - [ ] **TC-2:** Verify API is accessible once the user connects to the company VPN.
+
+---
+
+### 6. CSRF (Cross-Site Request Forgery) Protection
+**The Goal:** Prevent an attacker from tricking a logged-in user into performing unwanted actions (like changing a password or transferring money).
+
+**Graphical Workflow:**
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Server
+    Client->>Server: GET /form
+    Server-->>Client: 200 OK (X-CSRF-TOKEN: abc...)
+    Client->>Server: POST /transfer (Token: abc...)
+    Server->>Server: Match Token?
+    Server-->>Client: 200 OK
+```
+
+- **Pros:** Essential for protecting state-changing operations (POST/PUT/DELETE).
+- **Cons:** Adds complexity to forms and API requests (requires token management).
+- **Test Cases:**
+    - [ ] **TC-1:** Verify a state-changing request with a valid CSRF token succeeds.
+    - [ ] **TC-2:** Verify the same request without the token or with a fake token returns `403 Forbidden`.
+
+---
+
+### 7. XSS (Cross-Site Scripting) Protection
+**The Goal:** Prevent attackers from injecting malicious scripts into web pages viewed by other users.
+
+**Graphical Workflow:**
+```mermaid
+graph TD
+    Input[< script > alert(1) < /script >] --> Clean{Sanitization Engine}
+    Clean -- Safe Output --> UI[UI: &lt;script&gt;...]
+    Note right of Clean: HTML Encoding
+```
+
+- **Pros:** Protects user sessions and prevents account hijacking via script theft.
+- **Cons:** Can be complex to implement across all output points; potential for over-sanitization.
+- **Test Cases:**
+    - [ ] **TC-1:** Verify that script tags in comments are rendered as text, not executed by the browser.
+    - [ ] **TC-2:** Verify that input fields strip or encode dangerous HTML characters.
+
+---
+
+### Summary: API Protection Comparison Table
+
+| Technique | Primary Threat | Implementation Layer | Pros | Cons |
+| :--- | :--- | :--- | :--- | :--- |
+| **Rate Limiting** | DDoS / Brute Force | Gateway / Middleware | Prevents abuse | Blocks heavy users |
+| **CORS** | Unauthorized Websites | Browser / Header | Domain restriction | Hard to debug |
+| **Injection Prev.** | Data Breach | Code / Database | Protects data | Developer overhead |
+| **WAF** | OWASP Top 10 | Edge / Firewall | Automated defense | False positives |
+| **VPN** | Unauthorized Access | Network | Maximum isolation | High latency |
+| **CSRF** | Action Forgery | Form / Header | Protects state | Token management |
+| **XSS** | Script Injection | Frontend / Sanitizer | Protects sessions | Output complexity |
