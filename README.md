@@ -931,6 +931,13 @@ Token-based authentication is **stateless**, meaning the server does not need to
 #### 1. JWT (JSON Web Tokens) & Bearer Tokens
 A **Bearer Token** is a security token that gives access to the "bearer" (the person who holds it). **JWT** is the most popular format for these tokens.
 
+> [!NOTE]
+> **Bearer vs. JWT: Don't get confused!**
+> - **Bearer Token:** Is the **how**. It defines the *transport mechanism* (e.g., sending the token in the `Authorization: Bearer <token>` header). It's like the **Envelope**.
+> - **JWT:** Is the **what**. It defines the *data format* of the token itself. It's like the **Letter** inside the envelope.
+> *Note: A Bearer token doesn't HAVE to be a JWT (it could be a simple string), but most modern APIs use JWTs as Bearer tokens.*
+
+
 **Graphical Workflow:**
 ```mermaid
 sequenceDiagram
