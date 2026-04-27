@@ -863,6 +863,8 @@ sequenceDiagram
 #### 3. API Keys
 A long-lived unique string (identifier) assigned to a user or service, typically passed in a header or query parameter.
 
+![alt text](<Screenshot (64).png>)
+
 **Graphical Workflow:**
 ```mermaid
 sequenceDiagram
@@ -884,6 +886,8 @@ sequenceDiagram
 
 #### 4. Session-based Authentication
 The server creates a session for the user after login and stores it (usually in a DB or Redis), sending a **Session ID** back to the client via a cookie.
+
+![alt text](<Screenshot (66).png>)
 
 **Graphical Workflow:**
 ```mermaid
