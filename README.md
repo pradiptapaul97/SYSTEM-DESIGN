@@ -791,3 +791,56 @@ Instead of skipping a number of rows, you use a "pointer" (cursor) to the last i
 - **Complex Apps:** When your frontend requires deeply nested data from multiple sources.
 - **Mobile Apps:** When bandwidth is limited and you want to minimize payload size.
 - **Microservices:** When you want a "Gateway" (BFF) to aggregate data from multiple services.
+
+### Authentication (AuthN)
+**The Philosophy:** "Who are you?" Authentication is the process of verifying that a user or system is who they claim to be.
+
+#### Authentication vs. Authorization (The Key Difference)
+In system design, these two terms are often confused but serve very different purposes.
+
+| Feature | Authentication (AuthN) | Authorization (AuthZ) |
+| :--- | :--- | :--- |
+| **Question** | Who are you? | What are you allowed to do? |
+| **Goal** | Verify Identity | Verify Permissions |
+| **Example** | Logging in with a password. | Checking if a user is an "Admin" before deleting a file. |
+| **Occurs...** | **First** (Identity must be known) | **Second** (Permissions are checked after login) |
+
+
+### Authentication Methods
+
+![alt text](<Screenshot (63).png>)
+
+#### 1. Basic Authentication
+The simplest form of authentication where the client sends the username and password in the HTTP header.
+- **How it works:** The credentials are Base64 encoded and sent as `Authorization: Basic <credentials>`.
+- **Pros:** Very easy to implement.
+- **Cons:** Extremely insecure unless used over HTTPS (as credentials can be easily decoded). No built-in way to log out.
+
+#### 2. Session-based Authentication (Stateful)
+The server maintains a record of the user's session in its memory or a database.
+- **How it works:** User logs in → Server creates a **Session ID** → Server stores it (e.g., in Redis) → Server sends the ID to the client via a **Set-Cookie** header → Client sends the cookie back with every request.
+- **Pros:** Secure (sensitive data stays on the server); easy to revoke sessions immediately.
+- **Cons:** Harder to scale horizontally (requires session synchronization or "sticky sessions"); uses server-side memory.
+
+#### 3. Token-based Authentication (Stateless / JWT)
+The server does not store session data. Instead, the client carries all the necessary identity information in a signed token.
+- **How it works:** User logs in → Server creates a **JWT (JSON Web Token)** → Server signs it with a secret key → Server sends it to the client → Client sends it back in the `Authorization: Bearer <token>` header.
+- **Pros:** **Highly Scalable** (any server can verify the token without checking a database); works across different domains/services.
+- **Cons:** Tokens cannot be easily revoked before they expire; if a token is stolen, it can be used until it's dead.
+
+#### 4. OAuth 2.0 & OpenID Connect (OIDC)
+A framework for **delegated authentication**.
+- **How it works:** Instead of giving your password to a new app, you "Login with Google/GitHub." The app gets an **Access Token** from the provider to act on your behalf.
+- **Best For:** Third-party integrations and Single Sign-On (SSO).
+
+---
+
+### Comparison: Session vs. Token Authentication
+
+| Feature | Session-based (Cookies) | Token-based (JWT) |
+| :--- | :--- | :--- |
+| **Storage** | Server-side (DB/Redis) | **Client-side** (Local Storage/Cookie) |
+| **Scalability** | Harder (requires state management) | **Excellent (Stateless)** |
+| **Revocation** | Easy (just delete the session) | Hard (requires blacklisting or short TTLs) |
+| **Mobile Friendly** | No (Mobile apps handle cookies poorly) | **Yes (Standard for Mobile/APIs)** |
+| **Best For** | Traditional Web Apps | **Modern Microservices / Mobile Apps** |
