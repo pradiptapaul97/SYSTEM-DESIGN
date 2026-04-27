@@ -1185,15 +1185,35 @@ flowchart LR
 Protecting an API requires a multi-layered defense strategy. Below are 7 critical techniques to secure your system from common vulnerabilities and attacks.
 
 ### 1. Rate Limiting (Throttling)
-**The Goal:** Prevent abuse and DoS (Denial of Service) attacks by limiting how many requests a user or IP can make in a specific timeframe.
+**The Goal:** Prevent abuse and DoS (Denial of Service) attacks by limiting how many requests can be processed. In a production system, rate limiting is usually applied at multiple levels.
 
-**Graphical Workflow:**
+![alt text](<Screenshot (71).png>)
+
+**Graphical Workflow (Hierarchical Limiting):**
 ```mermaid
-flowchart TD
-    Request[Incoming Request] --> Bucket{Is Bucket Empty?}
-    Bucket -- No --> Allow[Allow Request & -1 Token]
-    Bucket -- Yes --> Block[429 Too Many Requests]
+graph TD
+    A[Incoming Traffic] --> B{Global Limit?}
+    B -- No --> C[Block 429]
+    B -- Yes --> D{Per-User/IP Limit?}
+    D -- No --> E[Block 429]
+    D -- Yes --> F{Per-Endpoint Limit?}
+    F -- No --> G[Block 429]
+    F -- Yes --> H[Process Request]
 ```
+
+#### Three Primary Strategies:
+
+1. **Per-Endpoint Rate Limiting:**
+   Different limits are applied to different API routes based on their "cost" or sensitivity.
+   - *Example:* `POST /login` might be limited to 5 requests per minute to prevent brute-force, while `GET /products` might allow 1,000 requests per minute.
+
+2. **Per-User or Per-IP Rate Limiting:**
+   Identifies the requester (via an API Key, User ID, or IP Address) and limits their specific usage.
+   - *Example:* A "Free Tier" user is limited to 100 requests/hour, while a "Premium Tier" user gets 10,000 requests/hour.
+
+3. **Overall (Global) Rate Limiting:**
+   The final line of defense. It limits the total number of requests the entire system can handle to prevent a complete crash during a DDoS attack.
+   - *Example:* The entire API Gateway refuses any traffic once it hits 50,000 requests per second across all users.
 
 - **Pros:** Protects server resources; prevents brute-force attacks.
 - **Cons:** Can block legitimate heavy users if limits are too strict.
@@ -1205,6 +1225,8 @@ flowchart TD
 
 ### 2. CORS (Cross-Origin Resource Sharing)
 **The Goal:** A browser-level security mechanism that restricts which domains (origins) are allowed to access your API resources.
+
+![alt text](<Screenshot (73).png>)
 
 **Graphical Workflow:**
 ```mermaid
@@ -1228,6 +1250,8 @@ sequenceDiagram
 ### 3. SQL & NoSQL Injection Prevention
 **The Goal:** Prevent attackers from executing malicious database commands by injecting code into input fields.
 
+![alt text](<Screenshot (74).png>)
+
 **Graphical Workflow:**
 ```mermaid
 graph LR
@@ -1246,6 +1270,8 @@ graph LR
 
 ### 4. WAF (Web Application Firewall)
 **The Goal:** An edge security layer that filters, monitors, and blocks malicious HTTP traffic (like the OWASP Top 10) before it even reaches your server.
+
+![alt text](<Screenshot (75).png>)
 
 **Graphical Workflow:**
 ```mermaid
@@ -1266,6 +1292,8 @@ flowchart LR
 ### 5. VPNs (Virtual Private Networks)
 **The Goal:** Restrict API access to a private network, requiring users to be connected to a secure tunnel.
 
+![alt text](<Screenshot (76).png>)
+
 **Graphical Workflow:**
 ```mermaid
 graph LR
@@ -1284,6 +1312,8 @@ graph LR
 
 ### 6. CSRF (Cross-Site Request Forgery) Protection
 **The Goal:** Prevent an attacker from tricking a logged-in user into performing unwanted actions (like changing a password or transferring money).
+
+![alt text](<Screenshot (77).png>)
 
 **Graphical Workflow:**
 ```mermaid
@@ -1307,6 +1337,8 @@ sequenceDiagram
 
 ### 7. XSS (Cross-Site Scripting) Protection
 **The Goal:** Prevent attackers from injecting malicious scripts into web pages viewed by other users.
+
+![alt text](<Screenshot (78).png>)
 
 **Graphical Workflow:**
 ```mermaid
