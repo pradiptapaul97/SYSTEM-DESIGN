@@ -925,3 +925,73 @@ sequenceDiagram
 
 
 ### Token Based Authentication Methods
+
+Token-based authentication is **stateless**, meaning the server does not need to store session data. The "token" itself contains all the information needed to identify the user.
+
+#### 1. JWT (JSON Web Tokens) & Bearer Tokens
+A **Bearer Token** is a security token that gives access to the "bearer" (the person who holds it). **JWT** is the most popular format for these tokens.
+
+**Graphical Workflow:**
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Server
+    Client->>Server: POST /login (user/pass)
+    Server->>Server: Verify & Create JWT (Signed)
+    Server-->>Client: 200 OK (token: "header.payload.sig")
+    Note over Client: Subsequent Request
+    Client->>Server: GET /data (Authorization: Bearer <JWT>)
+    Server->>Server: Verify Signature & Expiry
+    Server-->>Client: 200 OK
+```
+
+- **JWT Structure:** 
+    - `Header`: Algorithm & Token type.
+    - `Payload`: User data (Claims) like `user_id` and `exp` (expiry).
+    - `Signature`: Ensures the token hasn't been tampered with.
+- **Pros:** **Stateless & Scalable** (No DB lookup needed); works perfectly for Microservices.
+- **Cons:** Hard to revoke (Tokens are valid until they expire); Large header size if payload is big.
+- **Test Cases:**
+    - [ ] **TC-1:** Verify valid JWT grants access.
+    - [ ] **TC-2:** Verify tampered JWT (modified payload) is rejected (Expect 401).
+    - [ ] **TC-3:** Verify expired JWT is rejected.
+
+---
+
+#### 2. Access & Refresh Tokens
+To improve security, we use **Short-lived Access Tokens** (e.g., 15 mins) and **Long-lived Refresh Tokens** (e.g., 7 days).
+
+**Graphical Workflow:**
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Server
+    participant DB
+    Client->>Server: POST /login
+    Server-->>Client: {access_token: "short", refresh_token: "long"}
+    Note over Client: Access Token Expires...
+    Client->>Server: GET /resource (access_token)
+    Server-->>Client: 401 Unauthorized (Expired)
+    Client->>Server: POST /refresh (refresh_token)
+    Server->>DB: Is refresh_token valid?
+    DB-->>Server: Yes
+    Server-->>Client: {new_access_token: "short"}
+```
+
+- **Pros:** **Better Security** (If an access token is stolen, it's only useful for a few minutes); Refresh tokens can be revoked in the DB to "log out" a user.
+- **Cons:** More complex to implement on the frontend (Requires logic to handle token refreshing silently).
+- **Test Cases:**
+    - [ ] **TC-1:** Verify Access Token works for its duration.
+    - [ ] **TC-2:** Verify Refresh Token can generate a new Access Token after expiry.
+    - [ ] **TC-3:** Verify that revoking a Refresh Token prevents further access.
+
+---
+
+### Comparison: JWT vs. Access/Refresh Tokens
+
+| Feature | Simple JWT (Bearer) | Access & Refresh Tokens |
+| :--- | :--- | :--- |
+| **Lifecycle** | Single token with moderate life | **Two tokens (Short & Long lived)** |
+| **Security** | Medium (Wait for expiry) | **High (Rotation & Revocation)** |
+| **Complexity** | Low | **High** |
+| **Best For** | Simple APIs / Internal tools | **Secure Web & Mobile Apps** |
