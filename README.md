@@ -922,3 +922,6 @@ sequenceDiagram
 | **Complexity**| Very Low | Medium | Low | High |
 | **Scalability** | High | High | High | Low (Requires Shared Store) |
 | **Best For** | Internal testing | Legacy systems | Public APIs | **Web Applications** |
+
+
+### Token Based Authentication Methods
