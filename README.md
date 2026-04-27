@@ -1367,3 +1367,117 @@ graph TD
 | **VPN** | Unauthorized Access | Network | Maximum isolation | High latency |
 | **CSRF** | Action Forgery | Form / Header | Protects state | Token management |
 | **XSS** | Script Injection | Frontend / Sanitizer | Protects sessions | Output complexity |
+
+---
+
+## Database Scaling Deep Dive: Replication & Sharding
+
+When a single database can no longer handle the traffic or storage, we must scale horizontally using Replication (for availability/reads) and Sharding (for writes/data volume).
+
+### 1. Database Replication
+Replication is the process of keeping copies of the same data on multiple servers.
+
+#### A. Replication Models: Leader-Follower vs. Multi-Leader
+- **Leader-Follower (Primary-Secondary):** The standard model. One node (Leader) handles all writes, while others (Followers) handle reads.
+- **Multi-Leader (Leader-Leader):** Multiple nodes act as leaders and can accept writes simultaneously. Data is synchronized between them.
+
+**Graphical Comparison:**
+```mermaid
+graph LR
+    subgraph Leader-Follower
+    L1[Leader: Write] --> F1[Follower: Read]
+    L1 --> F2[Follower: Read]
+    end
+    
+    subgraph Multi-Leader
+    ML1[Leader A: Write] <--> ML2[Leader B: Write]
+    ML1 --> R1[Read Node]
+    ML2 --> R2[Read Node]
+    end
+```
+
+#### B. Sync vs. Async Replication
+- **Synchronous:** The Leader waits for all Followers to confirm they've received the data before telling the user "Success."
+    - **Pros:** Zero data loss; guaranteed consistency.
+    - **Cons:** High latency (Slowest Follower dictates speed); if one node is down, writes fail.
+- **Asynchronous:** The Leader writes locally and immediately tells the user "Success," then sends data to Followers in the background.
+    - **Pros:** High performance; system stays up even if Followers are slow.
+    - **Cons:** Risk of data loss if the Leader crashes before syncing; **Eventual Consistency** (Followers might be slightly outdated).
+
+---
+
+### 2. Conflict Resolution (The Multi-Leader Challenge)
+When two users update the same record on different Leaders at the same time, a **Conflict** occurs.
+
+**Strategies to Solve Conflicts:**
+1. **LWW (Last Write Wins):** The database simply keeps the record with the most recent arrival time.
+2. **Timestamp-based:** Each write includes a high-resolution timestamp. The one with the highest timestamp is kept.
+3. **Custom Resolution:** The application code decides how to merge the data (e.g., merging two shopping carts instead of picking one).
+
+**Example: Multi-Leader Conflict**
+```mermaid
+sequenceDiagram
+    participant UA as User Alice
+    participant L1 as Leader 1
+    participant L2 as Leader 2
+    participant UB as User Bob
+    
+    UA->>L1: Update Name to "Alice"
+    UB->>L2: Update Name to "Bob"
+    L1->>L2: Sync "Alice"
+    L2->>L1: Sync "Bob"
+    Note over L1,L2: Conflict! Who wins?
+```
+
+- **Pros:** High write availability across regions.
+- **Cons:** Extremely complex; conflict resolution can lead to data loss if not handled carefully.
+- **Test Cases:**
+    - [ ] **TC-1:** Verify that an Async Follower eventually catches up to the Leader.
+    - [ ] **TC-2:** Simulate a conflict and verify the system resolves it using the chosen strategy (e.g., LWW).
+
+---
+
+### 3. Database Sharding (Horizontal Partitioning)
+Sharding is the process of breaking a big database into many smaller, faster, more easily managed parts called **shards**.
+
+#### Sharding Strategies:
+1. **Range-Based Sharding:** Data is split based on ranges of the Shard Key (e.g., Users A-M on Shard 1, N-Z on Shard 2).
+    - **Issue:** Can lead to "Hotspots" (e.g., if most users have names starting with 'S').
+2. **Hash-Based Sharding:** A hash function is applied to the Shard Key to determine the shard.
+    - **Pros:** Even distribution of data; no hotspots.
+    - **Cons:** Range queries (e.g., "Give me all users between age 20-30") become very slow because data is scattered.
+
+**Graphical Workflow:**
+```mermaid
+graph TD
+    Data[New User: Alice] --> H{Hash Function}
+    H -- Hash: 402 --> S1[(Shard 1: ID 0-500)]
+    H -- Hash: 850 --> S2[(Shard 2: ID 501-1000)]
+```
+
+- **NoSQL Example (MongoDB):** Uses **Shard Keys** and a `mongos` router to distribute documents across a cluster.
+- **SQL Example (PostgreSQL):** Uses **Declarative Partitioning** or third-party tools like Citus to shard tables across multiple servers.
+
+---
+
+### Summary: Replication vs. Sharding Comparison
+
+| Feature | Replication | Sharding |
+| :--- | :--- | :--- |
+| **Primary Goal** | **Availability & Read Scaling** | **Storage & Write Scaling** |
+| **Model** | Leader-Follower / Multi-Leader | **Horizontal Partitioning** |
+| **Data Location** | Every node has a full copy | Each node has a unique slice |
+| **Conflict Risk** | Low (except Multi-Leader) | **High (if Shard Key is bad)** |
+| **Consistency** | Eventual or Strong | Strong (within a shard) |
+| **SQL Solution** | PostgreSQL Streaming Replication | Citus / Manual Sharding |
+| **NoSQL Solution**| MongoDB Replica Sets | **MongoDB Sharded Clusters** |
+
+---
+
+### Pros and Cons Summary
+
+| Method | Pros | Cons |
+| :--- | :--- | :--- |
+| **Leader-Follower** | Simple, Great for Read-heavy apps | Single point of failure for Writes |
+| **Multi-Leader** | Write scalability across regions | **Conflict resolution nightmares** |
+| **Sharding** | Unlimited storage and write scaling | No cross-shard joins; complex rebalancing |
