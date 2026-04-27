@@ -654,6 +654,10 @@ The **Transport Layer** is responsible for end-to-end communication and data tra
 - **Reliable & Ordered:** If a packet is lost, TCP automatically detects it and retransmits it. It also reassembles packets in the correct order if they arrive out of sequence.
 - **Flow Control & Congestion Control:** TCP slows down the transmission if the network is congested or if the receiver is overwhelmed.
 
+> [!TIP]
+> **Real-World Analogy:** Think of TCP like sending a package via a courier with **proper tracking, delivery receipts, and a required signature**. If the package is lost, the courier finds it or sends a replacement.
+
+
 #### The TCP 3-Way Handshake
 ```mermaid
 sequenceDiagram
