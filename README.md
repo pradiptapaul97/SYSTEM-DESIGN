@@ -968,6 +968,8 @@ sequenceDiagram
 #### 2. Access & Refresh Tokens
 To improve security, we use **Short-lived Access Tokens** (e.g., 15 mins) and **Long-lived Refresh Tokens** (e.g., 7 days).
 
+![alt text](<Screenshot (67).png>)
+
 **Graphical Workflow:**
 ```mermaid
 sequenceDiagram
@@ -1002,3 +1004,6 @@ sequenceDiagram
 | **Security** | Medium (Wait for expiry) | **High (Rotation & Revocation)** |
 | **Complexity** | Low | **High** |
 | **Best For** | Simple APIs / Internal tools | **Secure Web & Mobile Apps** |
+
+### OAuth2 and ODIC Authentication Methods
+
