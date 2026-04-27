@@ -1068,3 +1068,36 @@ sequenceDiagram
 - **Use OIDC** when you want a "Login with X" button to handle user registration and login.
 
 
+### SSO and Identity protocols
+
+**SSO (Single Sign-On)** allows users to log in once and access multiple applications without re-entering credentials. 
+
+#### 1. SAML (Security Assertion Markup Language)
+SAML is an older, XML-based standard widely used in enterprise environments.
+
+![alt text](<Screenshot (70).png>)
+
+**Graphical Workflow:**
+```mermaid
+sequenceDiagram
+    participant User
+    participant SP as Service Provider (Your App)
+    participant IdP as Identity Provider (Okta/Azure)
+    
+    User->>SP: Try to access protected page
+    SP->>User: Redirect to IdP (Generate SAML Request)
+    User->>IdP: Authenticate (Login)
+    IdP-->>User: Send SAML Assertion (Signed XML)
+    User->>SP: Submit Assertion
+    SP->>IdP: Verify Signature (Optional)
+    SP-->>User: Grant Access
+```
+
+- **Pros:** Mature, Secure, Widely supported in Enterprises.
+- **Cons:** Complex (XML is verbose), Heavy payload, Slow to parse.
+- **Test Cases:**
+    - [ ] **TC-1:** Verify user is redirected to IdP upon accessing protected route.
+    - [ ] **TC-2:** Verify SAML response signature validation.
+    - [ ] **TC-3:** Verify user is denied access if Assertion is tampered with.
+
+---
